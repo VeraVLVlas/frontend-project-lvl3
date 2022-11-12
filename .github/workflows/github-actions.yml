@@ -1,0 +1,21 @@
+name: github-actions
+on: push
+jobs:
+  my-job:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: 'accessible'
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v1
+        name: 'setup node'
+        with:
+          node-version: '14.x'
+
+      - name: 'installation'
+        run: npm ci
+      
+      - name: 'linter-check'
+        run: npx eslint
