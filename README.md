@@ -1,3 +1,6 @@
+### Open the application in the browser
+<a href='https://frontend-project-lvl3-three.vercel.app/'>LINK</a>
+
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/VeraVLVlas/frontend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/VeraVLVlas/frontend-project-lvl3/actions)
 
