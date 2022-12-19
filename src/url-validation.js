@@ -1,19 +1,30 @@
 import * as yup from 'yup';
 
+yup.setLocale({
+  string: {
+    url: 'state_form.invalid_url',
+  }
+});
+
 const schema = yup.object().shape({
   url: yup.string().required().url(),
 });
 
 const validationСhecks = (url) => {
+  let message = '';
+
   return schema
-    .isValid({
+    .validate({
       url: url,
     })
     .then((valid) => {
       return valid;
     })
     .catch((error) => {
-      throw new Error(error);
+      error.errors.map((err) => {
+        return message = err;
+      })
+      return message;
     });
 }
 
