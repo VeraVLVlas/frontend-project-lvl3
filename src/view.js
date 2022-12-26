@@ -2,6 +2,8 @@ import i18next from './i18n.js';
 import onChange from 'on-change';
 import resources from '../locales/index.js';
 import validationСhecks from './url-validation.js';
+import parsing  from './parsing.js';
+import contentRendering from './content-rendering.js';
 
 const init = () => {
   const form = document.querySelector('.rss-form');
@@ -13,10 +15,11 @@ const init = () => {
   const state = {
     receivingData: 'filling',
     url: [],
+    feeds: [],
+    posts: [],
   }
 
   const watchedState = onChange(state, (path, value) => {
-
     if (value === 'failed') {
       feedback.textContent = message;
       feedback.classList.remove('text-success');
@@ -32,6 +35,7 @@ const init = () => {
     };
 
     if (value === 'finished') {
+      contentRendering(state.feeds, state.posts, i18nInstance);
       feedback.textContent = message;
       feedback.classList.remove('text-danger');
       feedback.classList.add('text-success');
@@ -61,11 +65,33 @@ const init = () => {
           message = i18nInstance.t('state_form.existing_url');
           watchedState.receivingData = 'repeat';
           return;
-        } else {
-          message = i18nInstance.t('state_form.success');
-          watchedState.url.push(url);
-          watchedState.receivingData = 'finished';
         }
+        parsing(url)
+          .then((resources) => {
+            const [data, status] = resources;
+            if (status === 200 && data.length !== 0) {
+              const [feed, posts] = data;
+              console.log(feed, 'feed');
+              watchedState.feeds.push(...feed);
+              watchedState.posts.push(...posts);
+              message = i18nInstance.t('state_form.success');
+            } else if (status === 200 && data.length === 0) {
+              message = i18nInstance.t('state_form.invalid_rss');
+              watchedState.receivingData = 'failed';
+              return;
+            } else {
+              message = i18nInstance.t('state_form.unknown_error');
+              watchedState.receivingData = 'failed';
+              return;
+            }
+            watchedState.url.push(url);
+            watchedState.receivingData = 'finished';
+          })
+          .catch((error) => {
+            message = i18nInstance.t('state_form.network_error');
+            watchedState.receivingData = 'failed';
+            throw new Error(error);
+          });
         watchedState.receivingData = 'filling';
       })
   });
